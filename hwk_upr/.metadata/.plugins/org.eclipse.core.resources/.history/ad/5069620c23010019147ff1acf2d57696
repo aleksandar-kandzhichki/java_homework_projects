@@ -1,0 +1,11 @@
+
+public class DataEntry {
+
+	String time;
+	String context;
+	String component;
+	String name;
+	String description;
+	String origin;
+	String ip;
+}

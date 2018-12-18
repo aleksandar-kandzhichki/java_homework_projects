@@ -1,0 +1,44 @@
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Scanner;
+
+import org.omg.CORBA.portable.InputStream;
+import org.omg.CORBA.portable.OutputStream;
+
+public class main {
+
+	int port = 9991;
+	
+	public static void main(String[] args) {
+		System.out.println("hello world");
+		
+		launchServer();
+	}
+	
+	public void launchServer() throws IOException {
+		try(ServerSocket serverSocket = new ServerSocket(port)) {
+	        Socket connectionSocket = serverSocket.accept();
+	        
+	        InputStream inputToServer = (InputStream) connectionSocket.getInputStream();
+	        OutputStream outputFromServer = (OutputStream) connectionSocket.getOutputStream();
+	        
+	        Scanner scanner = new Scanner(inputToServer, "UTF-8");
+	        PrintWriter serverPrintOut = new PrintWriter(new OutputStreamWriter(outputFromServer, "UTF-8"), true);
+
+	        serverPrintOut.println("Hello! Enter Peace to exit.");
+	        
+	        boolean done = false;
+	        while(!done && scanner.hasNextLine()) {
+	            String line = scanner.nextLine();
+	            serverPrintOut.println("Echo from <Your name Here> Server: " + line);
+
+	            if(line.toLowerCase().trim().equals("peace")) {
+	                done = true;
+	            }
+	        }
+		}
+	}
+}

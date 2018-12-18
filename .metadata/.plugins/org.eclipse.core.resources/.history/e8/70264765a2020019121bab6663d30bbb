@@ -1,0 +1,27 @@
+package hwk_upr;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.Socket;
+
+public class serverChatThread extends Thread {
+	Socket csocket;
+
+	public serverChatThread(Socket csocket) {
+	  this.csocket = csocket;
+	}
+
+    public void run() {
+      try {
+    	InputStream serverIn = csocket.getInputStream();
+        for (int i = 10; i >= 0; i--) {
+        	
+        }
+        serverIn.close();
+        csocket.close();
+      } catch (IOException e) {
+        System.out.println(e);
+      }
+    }
+}

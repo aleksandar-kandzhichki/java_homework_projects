@@ -1,0 +1,11 @@
+package hwk_upr;
+
+import java.net.Socket;
+
+public class serverChatThread extends Thread {
+	Socket csocket;
+
+	public SocketThread(Socket csocket) {
+	  this.csocket = csocket;
+	}
+}

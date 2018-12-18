@@ -1,0 +1,18 @@
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class main {
+
+	int port = 9991;
+	
+	public static void main(String[] args) {
+		System.out.println("hello world");
+	}
+	
+	public void launchServer() throws IOException {
+		try(ServerSocket serverSocket = new ServerSocket(port)) {
+	        Socket connectionSocket = serverSocket.accept();
+		}
+	}
+}

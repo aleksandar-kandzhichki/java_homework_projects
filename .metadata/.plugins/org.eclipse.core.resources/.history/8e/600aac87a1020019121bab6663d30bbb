@@ -1,0 +1,11 @@
+package hwk_upr;
+
+public class Launch {
+	public static void main() {
+		
+	}
+	
+	public static void lauchServer() {
+		
+	}
+}

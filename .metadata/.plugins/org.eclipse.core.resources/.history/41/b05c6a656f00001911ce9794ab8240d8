@@ -1,0 +1,24 @@
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+import org.omg.CORBA.portable.InputStream;
+import org.omg.CORBA.portable.OutputStream;
+
+public class main {
+
+	int port = 9991;
+	
+	public static void main(String[] args) {
+		System.out.println("hello world");
+	}
+	
+	public void launchServer() throws IOException {
+		try(ServerSocket serverSocket = new ServerSocket(port)) {
+	        Socket connectionSocket = serverSocket.accept();
+	        
+	        InputStream inputToServer = (InputStream) connectionSocket.getInputStream();
+	        OutputStream outputFromServer = (OutputStream) connectionSocket.getOutputStream();
+		}
+	}
+}

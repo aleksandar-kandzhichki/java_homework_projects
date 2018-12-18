@@ -1,0 +1,30 @@
+
+public class DataEntry {
+
+	String time;
+	String context;
+	String component;
+	String name;
+	String description;
+	String origin;
+	String ip;
+	
+	DataEntry(DataEntry old){
+		time = old.time;
+		context = old.context;
+		component = old.component;
+		name = old.name;
+		description = old.description;
+		origin = old.origin;
+		ip = old.ip;
+	}
+	
+	void fromRow(String row) {
+		char separator = ',';
+		fromRow(row, separator);
+	}
+	void fromRow(String row, char separator) {
+		if(!separator)
+		String[] split = row.split(separator);
+	}
+}

@@ -1,0 +1,43 @@
+package hwk_upr;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.List;
+
+public class Launch {
+	static int port = 9991;
+	static String endCommunicationStr = "endConnection";
+	
+	public static void main() {
+		
+	}
+	
+	public static void lauchServer() {
+
+		try(ServerSocket serverSocket = new ServerSocket(port)) {
+            Socket connectionSocket = serverSocket.accept();
+
+            //Create Input&Outputstreams for the connection
+            InputStream inputToServer = connectionSocket.getInputStream();
+            OutputStream outputFromServer = connectionSocket.getOutputStream();
+
+            PrintWriter serverPrintOut = new PrintWriter(new OutputStreamWriter(outputFromServer, "UTF-8"), true);
+
+            List<DataEntry> data = readFromClient(inputToServer);
+            
+            serverPrintOut.write("Received all data successfully!");
+            
+            MiningHelper miningHelper = new MiningHelper();
+            miningHelper.prepareFilesForDataMining(data);
+            miningHelper.runDataMining();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+}
