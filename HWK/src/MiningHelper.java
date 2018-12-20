@@ -4,14 +4,20 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
-import ca.pfv.spmf.algorithms.sequential_rules.cmrules.AlgoCMRules;
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Item;
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Sequence;
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.predictor.Paramable;
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.predictor.CPT.CPTPlus.CPTPlusPredictor;
 
 public class MiningHelper {
 
@@ -29,38 +35,61 @@ public class MiningHelper {
 
 	
 	private void extendMapper(DataEntry entry) {
-		if(!keys.containsKey(entry.component)) {mapper.add(entry.component);keys.put(entry.component, ++uniqueKeys);} 
+		// ATM we care only about the context, so we map only it!
+		
+		// if(!keys.containsKey(entry.component)) {mapper.add(entry.component);keys.put(entry.component, ++uniqueKeys);} 
 		if(!keys.containsKey(entry.context)) {mapper.add(entry.context); keys.put(entry.context, ++uniqueKeys);} 
-		if(!keys.containsKey(entry.description)) {mapper.add(entry.description); keys.put(entry.description, ++uniqueKeys);} 
-		if(!keys.containsKey(entry.name)) {mapper.add(entry.name); keys.put(entry.name, ++uniqueKeys);} 
+		// if(!keys.containsKey(entry.description)) {mapper.add(entry.description); keys.put(entry.description, ++uniqueKeys);} 
+		// if(!keys.containsKey(entry.name)) {mapper.add(entry.name); keys.put(entry.name, ++uniqueKeys);} 
 	}
 	
 	public void prepareFilesForDataMining(List<DataEntry> data) throws IOException {
-		BufferedWriter fileToPrepare = new BufferedWriter(new FileWriter(new File(dataMiningInput)));
+		// BufferedWriter fileToPrepare = new BufferedWriter(new FileWriter(new File(dataMiningInput)));
 		
-		java.util.Iterator<DataEntry> iter = data.iterator();
-		DataEntry cur;
-		while(iter.hasNext()) {
-			cur= iter.next();
-			extendMapper(cur);
-			String row = cur.toSequenceRow(keys);
-			fileToPrepare.write(row);
-			fileToPrepare.newLine();
-		}
+		// prepare two-way mapping of keys to +Integers
+		// data.stream().forEach(entry -> extendMapper(entry));
 		
-		fileToPrepare.close();
+		// get sequencial rows needed for CPT+
+		// List<String> rows = DataEntry.getSequenceRows(keys, data);
+		// Iterator<String> rowsIter = rows.iterator();
+		// while(rowsIter.hasNext()) {
+			// fileToPrepare.write(rowsIter.next() + "\n");
+		// }
+
+		
+		// fileToPrepare.close();
 	}
 	
-	public void runDataMining() {
-		AlgoCMRules lib = new AlgoCMRules();
-		String input = dataMiningInput;
-		String output = dataMiningOutput;
+	public List<Sequence> getItemsToTrain(List<DataEntry> data) {
+		data.stream().forEach(entry -> extendMapper(entry));
 		
-		try {
-			lib.runAlgorithm(input, output, 0.01, 0.01);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		List<Sequence> rows = DataEntry.getSequenceList(keys, data);
+		return rows;
+	}
+	
+	public void runDataMining(List<DataEntry> data) {
+		CPTPlusPredictor alg = new CPTPlusPredictor();
+		//AlgoCMRules lib = new AlgoCptPlus();
+		//String input = dataMiningInput;
+		//String output = dataMiningOutput;
+		
+		List<Sequence> trainSet = getItemsToTrain(data);
+		
+		alg.Train(trainSet);
+		
+		Sequence toPredict = new Sequence(232323);
+		toPredict.addItem(new Item(7));
+		toPredict.addItem(new Item(3));
+		
+		Sequence predicted = alg.Predict(toPredict);
+		predicted.getItems().stream().forEach(item -> System.out.println(item.toString()));
+		
+		
+		
+		Sequence toPredict2 = new Sequence(2223333);
+		toPredict2.addItem(new Item(5));
+		toPredict2.addItem(new Item(4));
+		Sequence predicted2 = alg.Predict(toPredict2);
+		predicted2.getItems().stream().forEach(item -> System.out.println( mapper.get(item.val) ));
 	}
 }

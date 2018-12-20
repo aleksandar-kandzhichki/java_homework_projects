@@ -17,6 +17,7 @@ import java.util.List;
 public class Launch {
 	static int port = 9991;
 	static String endCommunicationStr = "endConnection";
+	static String serverAddress = "localhost";
 	
 	public static void main(String[] args) {
 		Thread thread1 = new Thread () {
@@ -55,7 +56,7 @@ public class Launch {
 		System.out.println("started client");
 
 		try {
-	        Socket clientSocket = new Socket("localhost", port);
+	        Socket clientSocket = new Socket(serverAddress, port);
 	        DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 	        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 	

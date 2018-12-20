@@ -26,6 +26,7 @@ public class main {
 	static int port = 9991;
 	static String endCommunicationStr = "endCSV";
 	static String readFilePath = "dataCsv.csv";
+	static String serverAddress = "localhost";
 	
 	public static void main(String[] args) {
 		System.out.println("hello world");
@@ -63,15 +64,16 @@ public class main {
             InputStream inputToServer = connectionSocket.getInputStream();
             OutputStream outputFromServer = connectionSocket.getOutputStream();
 
-            PrintWriter serverPrintOut = new PrintWriter(new OutputStreamWriter(outputFromServer, "UTF-8"), true);
+            PrintWriter serverPrintOut = new PrintWriter(new OutputStreamWriter(outputFromServer, "UTF-16"), true);
 
             List<DataEntry> data = readFromClient(inputToServer);
             
             serverPrintOut.write("Received all data successfully!");
             
             MiningHelper miningHelper = new MiningHelper();
-            miningHelper.prepareFilesForDataMining(data);
-            miningHelper.runDataMining();
+            // miningHelper.prepareFilesForDataMining(data);
+            
+            miningHelper.runDataMining(data);
             
         } catch (IOException e) {
             e.printStackTrace();
@@ -83,7 +85,7 @@ public class main {
 		String row;
 		BufferedReader inFromUser = new BufferedReader(new FileReader(new File(readFilePath)));
 
-        Socket clientSocket = new Socket("localhost", port);
+        Socket clientSocket = new Socket(serverAddress, port);
         DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
