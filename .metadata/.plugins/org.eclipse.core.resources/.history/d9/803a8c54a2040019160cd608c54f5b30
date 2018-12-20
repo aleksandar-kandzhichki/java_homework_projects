@@ -109,6 +109,9 @@ public class DataEntry {
 				DataEntry curDataEntry = userRecordsIter.next();
 				if(!curDataEntry.date.equals(currentTime)) {
 					// then we should start writing new row, save current
+					// String currentRow = DataEntry.toSequence(keyMapper, currentItemset);
+					// currentRow += "-2";
+					// rows.add(currentRow);
 					
 					String[] itemStrs = DataEntry.toSequence(keyMapper, currentItemset).split(" -1 ");
 					Sequence seq = new Sequence(++i);
@@ -137,4 +140,46 @@ public class DataEntry {
 		
 		return rows;
 	}
+
+
+	public static List<String> getSequenceRows(Map<String, Integer> keyMapper, List<DataEntry> data) {
+		// USELESS. COULD be used for CMRULES
+		
+		List<DataEntry> currentItemset = new ArrayList<DataEntry>();
+		List<String> rows = new ArrayList<String>();
+		
+		Iterator<String> userIpsIter = DataEntry.getUserIps(data).iterator();
+
+		
+		// iterate through all users
+		while(userIpsIter.hasNext()) {
+			final String currentUserIp = userIpsIter.next();
+			currentItemset.clear();
+			String currentTime = "";
+			
+			// prepare all records for single user. From them we make multiple rows, each row represents 1 user session activity (1 day)
+			List<DataEntry> userRecords = data.stream().filter(entry -> (entry.ip.equals(currentUserIp))).collect(Collectors.toList());
+			Iterator<DataEntry> userRecordsIter = userRecords.iterator();
+			
+			// iterate all records in file for this user
+			while(userRecordsIter.hasNext()) {
+				DataEntry curDataEntry = userRecordsIter.next();
+				if(!curDataEntry.date.equals(currentTime)) {
+					// then we should start writing new row, save current
+					String currentRow = DataEntry.toSequence(keyMapper, currentItemset);
+					currentRow += "-2";
+					rows.add(currentRow);
+					
+					currentTime = curDataEntry.date;
+					currentItemset.add(curDataEntry);
+				}
+				else {
+					currentItemset.add(curDataEntry);
+				}
+			}
+		}
+		
+		return rows;
+	}
+	
 }

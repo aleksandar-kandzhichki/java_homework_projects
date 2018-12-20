@@ -109,6 +109,9 @@ public class DataEntry {
 				DataEntry curDataEntry = userRecordsIter.next();
 				if(!curDataEntry.date.equals(currentTime)) {
 					// then we should start writing new row, save current
+					// String currentRow = DataEntry.toSequence(keyMapper, currentItemset);
+					// currentRow += "-2";
+					// rows.add(currentRow);
 					
 					String[] itemStrs = DataEntry.toSequence(keyMapper, currentItemset).split(" -1 ");
 					Sequence seq = new Sequence(++i);
