@@ -131,7 +131,7 @@ public class CPTPlusPredictor extends Predictor {
 			// List<List<Item>> itemsets = finder.findFrequentItemsets(trainingSequences, parameters.paramInt("CCFmin"), parameters.paramInt("CCFmax"), parameters.paramInt("CCFsup"));
 		    
 			// hardcode them to stop stupid exceptions from Profile class missing parameters property...
-			List<List<Item>> itemsets = finder.findFrequentItemsets(trainingSequences, 3, 15, 2);
+			List<List<Item>> itemsets = finder.findFrequentItemsets(trainingSequences, 1, 6, 2);
 		
 			//filling the encoder with the frequent itemsets
 			for(List<Item> itemset : itemsets) {
@@ -231,9 +231,9 @@ public class CPTPlusPredictor extends Predictor {
 		
 
 		//Setting parameters
-		int maxPredictionCount = 1 + (int) (target.size() * 0.5); // parameters.paramDouble("minPredictionRatio")); //minimum number of required prediction to ensure the best accuracy
+		int maxPredictionCount = 1 + (int) (target.size() * 1); // parameters.paramDouble("minPredictionRatio")); //minimum number of required prediction to ensure the best accuracy
 		int predictionCount = 0; //current number of prediction done (one by default because of the CountTable being updated with the target initially) 
-		double noiseRatio = 0.5;//parameters.paramDouble("noiseRatio"); //Ratio of items to remove in a sequence per level (level = target.size)
+		double noiseRatio = 1;//parameters.paramDouble("noiseRatio"); //Ratio of items to remove in a sequence per level (level = target.size)
 		int initialTargetSize = target.size();
 		
 		

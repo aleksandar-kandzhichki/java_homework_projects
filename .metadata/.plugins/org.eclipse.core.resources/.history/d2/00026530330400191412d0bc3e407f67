@@ -1,0 +1,161 @@
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
+
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Sequence;
+import ca.pfv.spmf.algorithms.sequential_rules.cmrules.AlgoCMRules;
+
+
+public class main {
+
+	static int port = 9991;
+	static String endCommunicationStr = "done!";
+	static String readFilePath = "dataCsv.csv";
+	static String serverAddress = "localhost";
+	static String encoding = "UTF-16";
+	static String separator = ",";
+	
+	public static void main(String[] args) {
+		System.out.println("hello world");
+		
+		Thread thread1 = new Thread () {
+			  public void run () {
+				try {
+					launchServer();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			  }
+			};
+		Thread thread2 = new Thread () {
+		  public void run () {
+			try {
+				LaunchClient();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		  }
+		};
+		thread1.start();
+		thread2.start();
+		
+	}
+	
+	public static void launchServer() throws IOException {
+		try(ServerSocket serverSocket = new ServerSocket(port)) {
+            Socket connectionSocket = serverSocket.accept();
+
+            //Create Input&Outputstreams for the connection
+            InputStream inputToServer = connectionSocket.getInputStream();
+            OutputStream outputFromServer = connectionSocket.getOutputStream();
+
+            PrintWriter serverPrintOut = new PrintWriter(new OutputStreamWriter(outputFromServer, encoding), true);
+
+            List<DataEntry> data = readTrainData(inputToServer);
+            
+            serverPrintOut.write("Received all data successfully! Training the model.");
+            
+            MiningHelper miningHelper = new MiningHelper();            
+            miningHelper.trainModel(data);
+            
+
+            serverPrintOut.write("Training done. Ask for sequences to predict.");
+            
+            Scanner scanner = new Scanner(inputToServer, encoding);
+            String read = "";
+            Sequence toPredict;
+            while(scanner.hasNextLine()) {
+            	read = scanner.nextLine();
+            	
+            	toPredict = miningHelper.stringToSequence(read, separator);
+            	serverPrintOut.println(miningHelper.fromSequence(miningHelper.predict(toPredict)));
+            }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	public static void LaunchClient() throws IOException {
+		System.out.println("started client");
+		String row;
+		BufferedReader inFromUser = new BufferedReader(new FileReader(new File(readFilePath)));
+
+        Socket clientSocket = new Socket(serverAddress, port);
+        DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+        boolean done = false;
+
+        while(!done) {
+	        row = inFromUser.readLine();
+	        if(row == null || row.length() == 0) done=true;
+	        else {
+	        	outToServer.writeBytes(row + '\n');
+	        }
+        }
+        
+        outToServer.writeBytes(endCommunicationStr + "\n");
+        inFromUser.close();
+        
+        String read = "";
+        do {
+        	read = inFromServer.readLine();
+        	System.out.println(read);
+        }while(read.toLowerCase().trim().equals(endCommunicationStr.toLowerCase()));
+
+
+        Scanner s = new Scanner(System.in);
+        do {
+        	read = s.nextLine();
+        	outToServer.writeBytes(read + "\n");
+        } while(read.toLowerCase().trim().equals(endCommunicationStr.toLowerCase()))
+        clientSocket.close();
+	}
+
+	
+
+	public static List<DataEntry> readTrainData(InputStream input){
+        Scanner scanner = new Scanner(input, encoding);
+        boolean done = false;
+        
+        List<DataEntry> data = new ArrayList<DataEntry>();
+
+        while(!done) {
+            String row = scanner.nextLine();
+
+            if(row.toLowerCase().trim().equals(endCommunicationStr.toLowerCase())) {
+                done = true;
+            }
+            else {
+            	try {
+					data.add((new DataEntry()).fromRow(row));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }
+        }
+
+        scanner.close();
+        return data;
+	}
+
+}

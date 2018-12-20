@@ -18,11 +18,11 @@
 <fullyQualifiedTypeName name="java.util.Set"/>
 <fullyQualifiedTypeName name="java.awt.List"/>
 <fullyQualifiedTypeName name="java.util.List"/>
-<fullyQualifiedTypeName name="java.util.stream.Collectors"/>
 <fullyQualifiedTypeName name="java.util.Iterator"/>
 <fullyQualifiedTypeName name="ca.pfv.spmf.algorithms.sequenceprediction.ipredict.predictor.CPT.CPTPlus.CPTPlusPredictor"/>
 <fullyQualifiedTypeName name="ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Item"/>
 <fullyQualifiedTypeName name="javax.sound.midi.Sequence"/>
-<fullyQualifiedTypeName name="ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Sequence"/>
 <fullyQualifiedTypeName name="ca.pfv.spmf.algorithms.sequenceprediction.ipredict.predictor.Paramable"/>
+<fullyQualifiedTypeName name="ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Sequence"/>
+<fullyQualifiedTypeName name="java.util.stream.Collectors"/>
 </qualifiedTypeNameHistroy>

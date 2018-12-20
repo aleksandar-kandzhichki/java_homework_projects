@@ -1,1 +1,4 @@
 1545262641884	Rename field 'time'
+1545293997980	Rename field 'mapper'
+1545294009513	Rename field 'keys'
+1545294081097	Rename method 'readFromClient'

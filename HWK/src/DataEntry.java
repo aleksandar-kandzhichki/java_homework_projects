@@ -91,7 +91,7 @@ public class DataEntry {
 		// iterate through all users
 		do {
 			String temp = "";
-			while(temp.equals("")) {
+			while(temp.equals("") && userIpsIter.hasNext()) {
 				temp = userIpsIter.next();
 			}
 			

@@ -17,16 +17,19 @@ import java.util.Scanner;
 
 import javax.swing.text.html.HTMLDocument.Iterator;
 
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Sequence;
 import ca.pfv.spmf.algorithms.sequential_rules.cmrules.AlgoCMRules;
-import ca.pfv.spmf.input.sequence_database_list_integers.*;
 
 
 public class main {
 
 	static int port = 9991;
-	static String endCommunicationStr = "endCSV";
+	static String endCommunicationStr = "done!";
 	static String readFilePath = "dataCsv.csv";
 	static String serverAddress = "localhost";
+	static String encoding = "UTF-8";
+	static String separator = ",";
+	static String closeStr = "close!";
 	
 	public static void main(String[] args) {
 		System.out.println("hello world");
@@ -64,17 +67,34 @@ public class main {
             InputStream inputToServer = connectionSocket.getInputStream();
             OutputStream outputFromServer = connectionSocket.getOutputStream();
 
-            PrintWriter serverPrintOut = new PrintWriter(new OutputStreamWriter(outputFromServer, "UTF-16"), true);
+            PrintWriter serverPrintOut = new PrintWriter(new OutputStreamWriter(outputFromServer, encoding), true);
 
-            List<DataEntry> data = readFromClient(inputToServer);
+            List<DataEntry> data = readTrainData(inputToServer);
             
-            serverPrintOut.write("Received all data successfully!");
+            serverPrintOut.println("Received all data successfully! Training the model.");
             
-            MiningHelper miningHelper = new MiningHelper();
-            // miningHelper.prepareFilesForDataMining(data);
+            MiningHelper miningHelper = new MiningHelper();            
+            miningHelper.trainModel(data);
             
-            miningHelper.runDataMining(data);
+
+            serverPrintOut.println("Training done. Ask for sequences to predict.");
+            serverPrintOut.println(endCommunicationStr);
             
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputToServer, encoding));
+            String read = "";
+            Sequence toPredict;
+            while(!read.equals(endCommunicationStr)) {
+            	read = reader.readLine();
+            	if(read.toLowerCase().trim().equals(closeStr.toLowerCase())) {
+            		break;
+            	}
+            	
+            	toPredict = miningHelper.stringToSequence(read, separator);
+            	serverPrintOut.println(miningHelper.fromSequence(miningHelper.predict(toPredict)));
+            }
+            
+            
+            //connectionSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,29 +122,49 @@ public class main {
         outToServer.writeBytes(endCommunicationStr + "\n");
         inFromUser.close();
         
-        String result = inFromServer.readLine();
+        String read = "";
+        while(!read.toLowerCase().trim().equals(endCommunicationStr.toLowerCase())) {
+        	read = inFromServer.readLine();
+        	System.out.println(read);
+        }
+
+
+        Scanner s = new Scanner(System.in);
+        String readClient = "";
+        while(!readClient.toLowerCase().trim().equals(endCommunicationStr.toLowerCase())) {
+        	readClient = s.nextLine();
+        	if(readClient.equals(closeStr)) {
+                s.close();
+                outToServer.writeBytes(closeStr + "\n");
+                clientSocket.close();
+                break;
+        	}
+        	outToServer.writeBytes(readClient + "\n");
+        	
+
+        	read = inFromServer.readLine();
+        	System.out.println(read);
+        }
         
-        System.out.println(result);
-        clientSocket.close();
 	}
 
 	
 
-	public static List<DataEntry> readFromClient(InputStream input){
-        Scanner scanner = new Scanner(input, "UTF-8");
+	public static List<DataEntry> readTrainData(InputStream input) throws IOException{
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         boolean done = false;
         
         List<DataEntry> data = new ArrayList<DataEntry>();
 
         while(!done) {
-            String row = scanner.nextLine();
+            String row = reader.readLine();
 
             if(row.toLowerCase().trim().equals(endCommunicationStr.toLowerCase())) {
                 done = true;
             }
             else {
             	try {
-					data.add((new DataEntry()).fromRow(row));
+					data.add((new DataEntry()).fromRow(row, separator));
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -132,7 +172,6 @@ public class main {
             }
         }
 
-        scanner.close();
         return data;
 	}
 

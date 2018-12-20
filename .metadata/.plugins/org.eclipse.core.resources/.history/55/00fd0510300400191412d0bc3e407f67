@@ -1,0 +1,66 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+import java.util.stream.Collectors;
+
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Item;
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.database.Sequence;
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.predictor.Paramable;
+import ca.pfv.spmf.algorithms.sequenceprediction.ipredict.predictor.CPT.CPTPlus.CPTPlusPredictor;
+
+public class MiningHelper {
+
+	Vector<String> decoder;
+	Map<String, Integer> keys;
+	int uniqueKeys;
+	static String dataMiningInput = "dataInput.txt";
+	static String dataMiningOutput = "dataOutput.txt";
+	CPTPlusPredictor alg;
+	
+	MiningHelper() {
+		decoder = new Vector<String>();
+		keys = new HashMap<String, Integer>();
+		uniqueKeys = 0;
+		alg =  new CPTPlusPredictor();
+	}
+
+	
+	private void extendMapper(DataEntry entry) {
+		// ATM we care only about the context, so we map only it!
+		
+		if(!keys.containsKey(entry.context)) {decoder.add(entry.context); keys.put(entry.context, ++uniqueKeys);} 
+	}
+	
+	
+	public List<Sequence> getItemsToTrain(List<DataEntry> data) {
+		data.stream().forEach(entry -> extendMapper(entry));
+		
+		List<Sequence> rows = DataEntry.getSequenceList(keys, data);
+		return rows;
+	}
+	
+	public void trainModel(List<DataEntry> data) {		
+		List<Sequence> trainSet = getItemsToTrain(data);
+		
+		alg.Train(trainSet);
+	}
+	
+	public String decode(Integer num) {
+		return decoder.get(num);
+	}
+	
+	public Sequence predict(Sequence seq) {
+		return alg.Predict(seq);
+	}
+}
